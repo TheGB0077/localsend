@@ -54,6 +54,9 @@ jobs:
           echo "PATH: $PATH"
           command -v flutter_distributor || echo "flutter_distributor not found"
 
+      - name: Disable RPATH error
+        run: echo "export QA_RPATHS=$[ 0x0002 ]" >> $GITHUB_ENV
+
       - name: Build rpm package
         working-directory: app
         run: flutter_distributor package --platform linux --targets rpm
