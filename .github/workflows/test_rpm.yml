@@ -5,7 +5,6 @@ on:
 
 env:
   FLUTTER_VERSION: "3.16.2"
-  QA_RPATHS: 0x0002
 
 jobs:
   build:
@@ -24,9 +23,7 @@ jobs:
 
   build_rpm:
     runs-on: ubuntu-latest
-    container: fedora:38
-    env:
-      QA_RPATHS: 0x0002
+    container: fedora:36
     steps:
       - uses: actions/checkout@v4
 
@@ -57,14 +54,10 @@ jobs:
           echo "PATH: $PATH"
           command -v flutter_distributor || echo "flutter_distributor not found"
 
-#      - name: Disable RPATH error
-#        run: |
-#          echo "export QA_RPATHS=$(( 0x0001|0x0010 ))" >> $GITHUB_ENV
-#          export QA_RPATHS=$(( 0x0001|0x0010 ))
 
       - name: Build rpm package
         working-directory: app
-        run: flutter_distributor package --platform linux --targets rpm
+        run: QA_RPATHS=$[ 0x0002 ] flutter_distributor package --platform linux --targets rpm
 
       - name: Find rpm file
         id: find_rpm
