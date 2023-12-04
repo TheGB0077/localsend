@@ -57,7 +57,7 @@ jobs:
 
       - name: Build rpm package
         working-directory: app
-        run: QA_RPATHS=$[ 0x0002 ] flutter_distributor package --platform linux --targets rpm
+        run: QA_RPATHS=$(( 0x0001|0x0002 )) flutter_distributor package --platform linux --targets rpm
 
       - name: Find rpm file
         id: find_rpm
