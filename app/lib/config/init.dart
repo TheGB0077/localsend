@@ -22,7 +22,6 @@ import 'package:localsend_app/provider/app_arguments_provider.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
-import 'package:localsend_app/provider/network/webrtc/signaling_provider.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
 
 // [FOSS_REMOVE_START]
@@ -224,8 +223,6 @@ Future<void> postInit(BuildContext context, Ref ref, bool appStart) async {
   } catch (e) {
     _logger.warning('Starting multicast listener failed', e);
   }
-
-  ref.redux(signalingProvider).dispatch(SetupSignalingConnection());
 
   if (appStart) {
     if (defaultTargetPlatform == TargetPlatform.macOS) {
