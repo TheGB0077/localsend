@@ -4,3 +4,6 @@ pub mod iroh_transfer;
 pub mod logging;
 pub mod model;
 pub mod stream;
+
+#[cfg(target_os = "android")]
+pub mod saf;
