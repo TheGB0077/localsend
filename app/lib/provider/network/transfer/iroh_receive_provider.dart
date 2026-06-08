@@ -47,8 +47,16 @@ class IrohReceiveState {
 }
 
 class IrohReceiveNotifier extends Notifier<IrohReceiveState> {
+  /// Guard flag: true while a ticket is being processed (from first
+  /// handleIrohTicket call until startSession completes). Prevents
+  /// burst multicast announcements from creating multiple sessions.
+  bool _processing = false;
+
   @override
   IrohReceiveState init() => const IrohReceiveState();
+
+  /// Whether a ticket is currently being processed.
+  bool get isProcessing => _processing;
 
   /// Start a receive session from a discovered iroh-capable device.
   ///
@@ -59,6 +67,7 @@ class IrohReceiveNotifier extends Notifier<IrohReceiveState> {
     required String ticket,
     required String destinationDirectory,
   }) async {
+    _processing = true;
     try {
       final receiver = await rust.irohReceiverNew(useRelay: false);
 
@@ -139,6 +148,8 @@ class IrohReceiveNotifier extends Notifier<IrohReceiveState> {
     } catch (e, st) {
       _logger.warning('Iroh receive start failed', e, st);
       state = const IrohReceiveState();
+    } finally {
+      _processing = false;
     }
   }
 

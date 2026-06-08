@@ -37,6 +37,9 @@ class IrohSendNotifier extends Notifier<Map<String, SendSessionState>> {
 
   /// Create a new iroh send session, import files, start serving, and
   /// broadcast the ticket.
+  ///
+  /// Cancels any existing sessions to the same target device first to avoid
+  /// stale providers serving outdated tickets.
   Future<String> startSession({
     required Device target,
     required List<CrossFile> files,
@@ -45,6 +48,13 @@ class IrohSendNotifier extends Notifier<Map<String, SendSessionState>> {
     required String senderFingerprint,
     required String version,
   }) async {
+    // Cancel any existing sessions to the same device fingerprint.
+    final staleSessions = state.entries.where((e) => e.value.target.fingerprint == target.fingerprint).map((e) => e.key).toList();
+    for (final id in staleSessions) {
+      _logger.info('Cancelling stale iroh send session $id');
+      await cancelSession(id);
+      closeSession(id);
+    }
     final sessionId = _uuid.v4();
 
     // Build the initial session state (same shape as HTTP send provider).
@@ -167,23 +177,29 @@ class IrohSendNotifier extends Notifier<Map<String, SendSessionState>> {
       _logger.info('Iroh sender started, ticket: ${ticket.substring(0, 20)}...');
 
       // 5. Update state to "sending" — files are now being served.
-      state = {
-        ...state,
-        sessionId: state[sessionId]!.copyWith(
-          status: SessionStatus.sending,
-          startTime: DateTime.now().millisecondsSinceEpoch,
-        ),
-      };
+      final currentSession = state[sessionId];
+      _logger.info('Looking up session $sessionId in state: found=${currentSession != null}, stateKeys=${state.keys.toList()}');
+      if (currentSession != null) {
+        state = {
+          ...state,
+          sessionId: currentSession.copyWith(
+            status: SessionStatus.sending,
+            startTime: DateTime.now().millisecondsSinceEpoch,
+          ),
+        };
 
-      // 6. Mark all files as "sending" — iroh serves them on demand.
-      state = {
-        ...state,
-        sessionId: state[sessionId]!.copyWith(
-          files: {
-            for (final e in state[sessionId]!.files.entries) e.key: e.value.copyWith(status: FileStatus.sending),
-          },
-        ),
-      };
+        // 6. Mark all files as "sending" — iroh serves them on demand.
+        state = {
+          ...state,
+          sessionId: state[sessionId]!.copyWith(
+            files: {
+              for (final e in state[sessionId]!.files.entries) e.key: e.value.copyWith(status: FileStatus.sending),
+            },
+          ),
+        };
+      } else {
+        _logger.warning('Session $sessionId not found in state after ticket creation');
+      }
 
       // TODO: Monitor for completion. Currently iroh has no receiver → sender
       // confirmation signal. The sender just serves until cancelled.
@@ -191,14 +207,17 @@ class IrohSendNotifier extends Notifier<Map<String, SendSessionState>> {
       // or we add a confirmation blob to the collection) is needed.
     } catch (e, st) {
       _logger.warning('Iroh send failed', e, st);
-      state = {
-        ...state,
-        sessionId: state[sessionId]!.copyWith(
-          status: SessionStatus.finishedWithErrors,
-          errorMessage: e.toString(),
-          endTime: DateTime.now().millisecondsSinceEpoch,
-        ),
-      };
+      final currentSession = state[sessionId];
+      if (currentSession != null) {
+        state = {
+          ...state,
+          sessionId: currentSession.copyWith(
+            status: SessionStatus.finishedWithErrors,
+            errorMessage: e.toString(),
+            endTime: DateTime.now().millisecondsSinceEpoch,
+          ),
+        };
+      }
     }
 
     return sessionId;

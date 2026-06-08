@@ -135,14 +135,7 @@ pub async fn iroh_sender_start(
 
     sender
         .peer_resolver
-        .announce_burst(
-            &msg,
-            &[
-                std::time::Duration::from_millis(100),
-                std::time::Duration::from_millis(500),
-                std::time::Duration::from_millis(2000),
-            ],
-        )
+        .announce(&msg)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -201,21 +194,28 @@ pub async fn iroh_receiver_download(
     file_indices_json: String,
     output_dir: String,
 ) -> Result<u64, String> {
+    tracing::info!("iroh_receiver_download called: indices={}, output_dir={}", file_indices_json, output_dir);
+
     let file_indices: Vec<usize> =
         serde_json::from_str(&file_indices_json).map_err(|e: serde_json::Error| e.to_string())?;
+
+    tracing::info!("Parsed file_indices: {:?}", file_indices);
 
     let (tx, _rx) = tokio::sync::mpsc::channel::<(usize, u64)>(100);
 
     let guard = receiver.inner.lock().await;
-    guard
+    let result = guard
         .download_files(&ticket, &file_indices, &PathBuf::from(output_dir), tx)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string());
+
+    tracing::info!("iroh_receiver_download result: {:?}", result);
+    result
 }
 
-/// Cancel the receiver session.
+/// Cancel and close the receiver session.
 pub async fn iroh_receiver_cancel(receiver: &RsIrohReceiver) -> Result<(), String> {
     let guard = receiver.inner.lock().await;
-    guard.cancel();
+    guard.close().await;
     Ok(())
 }

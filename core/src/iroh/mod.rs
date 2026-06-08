@@ -1,3 +1,4 @@
+pub mod peer_resolver;
 pub mod provider;
 pub mod receiver;
 

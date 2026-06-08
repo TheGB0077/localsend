@@ -49,6 +49,13 @@ class IncomingReceiveService extends Notifier<void> {
   /// applies quick-save logic, and pushes the appropriate page.
   Future<void> handleIrohTicket(String ticket) async {
     try {
+      // Guard: ignore if a session is already active OR a ticket is being processed.
+      final receiveNotifier = ref.notifier(irohReceiveProvider);
+      if (ref.read(irohReceiveProvider).session != null || receiveNotifier.isProcessing) {
+        _logger.info('Iroh receive session already active or processing, ignoring ticket');
+        return;
+      }
+
       final settings = ref.read(settingsProvider);
       final destinationDir = settings.destination ?? await getDefaultDestinationDirectory();
 
