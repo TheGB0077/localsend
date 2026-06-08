@@ -56,13 +56,7 @@ class DeviceListTile extends StatelessWidget {
               DeviceBadge(
                 backgroundColor: badgeColor,
                 foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                label: 'LAN • HTTP',
-              )
-            else
-              DeviceBadge(
-                backgroundColor: badgeColor,
-                foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                label: 'WebRTC',
+                label: device.supportsIroh ? 'LAN • Iroh' : 'LAN • HTTP',
               ),
             if (device.deviceModel != null)
               DeviceBadge(

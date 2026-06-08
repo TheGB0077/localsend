@@ -7,6 +7,7 @@ import 'package:localsend_app/model/persistence/favorite_device.dart';
 import 'package:localsend_app/model/state/nearby_devices_state.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/logging/discovery_logs_provider.dart';
+import 'package:localsend_app/provider/network/transfer/incoming_receive_service.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 /// This provider is responsible for:
@@ -19,6 +20,7 @@ final nearbyDevicesProvider = ReduxProvider<NearbyDevicesService, NearbyDevicesS
     isolateController: ref.notifier(parentIsolateProvider),
     favoriteService: ref.notifier(favoritesProvider),
     discoveryLogs: ref.notifier(discoveryLoggerProvider),
+    incomingReceiveService: ref.notifier(incomingReceiveServiceProvider),
   );
 });
 
@@ -26,14 +28,17 @@ class NearbyDevicesService extends ReduxNotifier<NearbyDevicesState> {
   final IsolateController _isolateController;
   final FavoritesService _favoriteService;
   final DiscoveryLogger _discoveryLogger;
+  final IncomingReceiveService _incomingReceiveService;
 
   NearbyDevicesService({
     required IsolateController isolateController,
     required FavoritesService favoriteService,
     required DiscoveryLogger discoveryLogs,
+    required IncomingReceiveService incomingReceiveService,
   }) : _discoveryLogger = discoveryLogs,
        _isolateController = isolateController,
-       _favoriteService = favoriteService;
+       _favoriteService = favoriteService,
+       _incomingReceiveService = incomingReceiveService;
 
   @override
   NearbyDevicesState init() => const NearbyDevicesState(
@@ -52,6 +57,15 @@ class StartMulticastListener extends AsyncReduxAction<NearbyDevicesService, Near
     await for (final device in notifier._isolateController.state.multicastDiscovery!.receiveFromIsolate) {
       await dispatchAsync(RegisterDeviceAction(device));
       notifier._discoveryLogger.addLog('[DISCOVER/UDP] ${device.alias} (${device.ip}, model: ${device.deviceModel})');
+
+      // If this device announcement includes an iroh ticket, it means
+      // someone is sending files to us via iroh transport.
+      // Delegate to the IncomingReceiveService (a Notifier with ref access).
+      final ticket = device.irohTicket;
+      if (ticket != null && ticket.isNotEmpty) {
+        // ignore: discarded_futures
+        notifier._incomingReceiveService.handleIrohTicket(ticket);
+      }
     }
     return state;
   }

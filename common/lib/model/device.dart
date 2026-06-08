@@ -29,15 +29,16 @@ class HttpDiscovery extends DiscoveryMethod with HttpDiscoveryMappable {
 }
 
 @MappableClass()
-class SignalingDiscovery extends DiscoveryMethod with SignalingDiscoveryMappable {
-  final String signalingServer;
+class IrohDiscovery extends DiscoveryMethod with IrohDiscoveryMappable {
+  /// The iroh ticket string for connecting to this device.
+  final String irohTicket;
 
-  const SignalingDiscovery({required this.signalingServer});
+  const IrohDiscovery({required this.irohTicket});
 }
 
 enum TransmissionMethod {
   http('HTTP'),
-  webrtc('WebRTC');
+  iroh('Iroh');
 
   final String label;
 
@@ -67,11 +68,11 @@ class Device with DeviceMappable {
 
   Set<TransmissionMethod> get transmissionMethods {
     bool http = false;
-    bool webrtc = false;
+    bool iroh = false;
 
     for (final method in discoveryMethods) {
-      if (method is SignalingDiscovery) {
-        webrtc = true;
+      if (method is IrohDiscovery) {
+        iroh = true;
       } else {
         http = true;
       }
@@ -81,11 +82,27 @@ class Device with DeviceMappable {
     if (http) {
       methods.add(TransmissionMethod.http);
     }
-    if (webrtc) {
-      methods.add(TransmissionMethod.webrtc);
+    if (iroh) {
+      methods.add(TransmissionMethod.iroh);
     }
 
     return methods;
+  }
+
+  /// Whether this device supports iroh transport.
+  bool get supportsIroh => discoveryMethods.any((m) => m is IrohDiscovery);
+
+  /// The iroh ticket for this device, if available and non-empty.
+  /// During discovery this may be empty (capability-only) — the ticket
+  /// is generated at send time when both devices support iroh.
+  String? get irohTicket {
+    for (final method in discoveryMethods) {
+      if (method is IrohDiscovery) {
+        final ticket = method.irohTicket;
+        if (ticket.isNotEmpty) return ticket;
+      }
+    }
+    return null;
   }
 
   const Device({

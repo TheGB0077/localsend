@@ -6,11 +6,10 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:localsend_app/rust/frb_generated.dart';
 
-/// Create a new sender session. Files will be imported into a blob store
-/// at the given data directory.
+/// Create a new sender session.
 ///
-/// Set `use_relay` to true for internet transfers (uses n0 relay servers).
-/// Set to false for LAN-only transfers.
+/// - `data_dir`: path for the blob store
+/// - `use_relay`: true for internet transfers (n0 relay), false for LAN-only
 Future<RsIrohSender> irohSenderNew({
   required String dataDir,
   required bool useRelay,
@@ -19,7 +18,11 @@ Future<RsIrohSender> irohSenderNew({
   useRelay: useRelay,
 );
 
-/// Import a file into the blob store. Returns "hash_hex:file_size".
+/// Import a file into the blob store.
+///
+/// Handles `content://` URIs on Android by opening the SAF fd and creating
+/// a `/proc/self/fd/N` path for zero-copy mmap import (no full-file read
+/// into memory). Returns "hash_hex:file_size".
 Future<String> irohSenderImportFile({
   required RsIrohSender sender,
   required String filePath,
@@ -28,41 +31,38 @@ Future<String> irohSenderImportFile({
   filePath: filePath,
 );
 
-/// Create a ticket for the imported collection.
+/// Start the sender: create a ticket from imported files, begin serving blobs,
+/// and broadcast the ticket over multicast.
 ///
-/// `files_json` is a JSON array: [{"fileName":"...","size":123,"fileType":"...","hash":"...","lastModified":null}]
-Future<String> irohSenderCreateTicket({
+/// Spawns serving and announcing in background tokio tasks and returns
+/// immediately with the ticket string.
+///
+/// `files_json`: JSON array of `LocalSendFileMeta` objects.
+/// `sender_info_json`: JSON object with `alias`, `fingerprint`, `version`, `port`, `protocol` fields.
+Future<String> irohSenderStart({
   required RsIrohSender sender,
-  required String senderAlias,
-  required String senderFingerprint,
-  required String version,
+  required String senderInfoJson,
   required String filesJson,
-}) => RustLib.instance.api.crateApiIrohTransferIrohSenderCreateTicket(
+}) => RustLib.instance.api.crateApiIrohTransferIrohSenderStart(
   sender: sender,
-  senderAlias: senderAlias,
-  senderFingerprint: senderFingerprint,
-  version: version,
+  senderInfoJson: senderInfoJson,
   filesJson: filesJson,
 );
 
-/// Get the endpoint address as a JSON string.
-Future<String> irohSenderEndpointAddr({required RsIrohSender sender}) =>
-    RustLib.instance.api.crateApiIrohTransferIrohSenderEndpointAddr(sender: sender);
-
-/// Start serving blobs in the background. Blocks until cancelled.
-Future<void> irohSenderServe({required RsIrohSender sender}) => RustLib.instance.api.crateApiIrohTransferIrohSenderServe(sender: sender);
-
-/// Cancel the sender session.
+/// Cancel the sender session (stops serving and announcing).
 Future<void> irohSenderCancel({required RsIrohSender sender}) => RustLib.instance.api.crateApiIrohTransferIrohSenderCancel(sender: sender);
 
-/// Shut down the sender and clean up the blob store.
-Future<void> irohSenderShutdown({required RsIrohSender sender}) => RustLib.instance.api.crateApiIrohTransferIrohSenderShutdown(sender: sender);
-
 /// Create a new receiver session.
+///
+/// No peer discovery — the ticket comes from the Device model (IrohDiscovery)
+/// which is populated by the existing Dart multicast listener.
 Future<RsIrohReceiver> irohReceiverNew({required bool useRelay}) => RustLib.instance.api.crateApiIrohTransferIrohReceiverNew(useRelay: useRelay);
 
-/// Fetch the collection metadata from the provider using the ticket.
-/// Returns the LocalSendCollection as JSON.
+/// Fetch the collection metadata from a provider using a ticket.
+///
+/// `ticket`: the iroh ticket from a Device's IrohDiscovery (obtained via
+/// the existing Dart multicast discovery flow).
+/// Returns the `LocalSendCollection` as JSON (contains sender info + file list).
 Future<String> irohReceiverFetchCollection({
   required RsIrohReceiver receiver,
   required String ticket,
@@ -73,8 +73,9 @@ Future<String> irohReceiverFetchCollection({
 
 /// Download selected files from the provider.
 ///
-/// `file_indices_json` is a JSON array of indices into the collection's file list.
-/// `output_dir` is where files will be exported.
+/// - `ticket`: the iroh ticket
+/// - `file_indices_json`: JSON array of 0-based indices into the collection's file list
+/// - `output_dir`: directory to save files to
 /// Returns total bytes downloaded.
 Future<BigInt> irohReceiverDownload({
   required RsIrohReceiver receiver,
@@ -91,10 +92,6 @@ Future<BigInt> irohReceiverDownload({
 /// Cancel the receiver session.
 Future<void> irohReceiverCancel({required RsIrohReceiver receiver}) =>
     RustLib.instance.api.crateApiIrohTransferIrohReceiverCancel(receiver: receiver);
-
-/// Shut down the receiver and clean up.
-Future<void> irohReceiverShutdown({required RsIrohReceiver receiver}) =>
-    RustLib.instance.api.crateApiIrohTransferIrohReceiverShutdown(receiver: receiver);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RsIrohReceiver>>
 abstract class RsIrohReceiver implements RustOpaqueInterface {}

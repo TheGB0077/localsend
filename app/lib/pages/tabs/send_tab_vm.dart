@@ -9,10 +9,14 @@ import 'package:localsend_app/pages/progress_page.dart';
 import 'package:localsend_app/pages/send_page.dart';
 import 'package:localsend_app/pages/web_send_page.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
+import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/local_ip_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/scan_facade.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
+import 'package:localsend_app/provider/network/transfer/iroh_send_provider.dart';
+import 'package:localsend_app/provider/network/transfer/transport_factory.dart';
+import 'package:localsend_app/provider/network/transfer/transport_interface.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/util/favorites.dart';
@@ -76,6 +80,7 @@ final sendTabVmProvider = ViewProvider((ref) {
         builder: (_) => const AddressInputDialog(),
       );
       if (device != null && context.mounted) {
+        // Manual address entry always uses HTTP (no iroh discovery)
         await ref
             .notifier(sendProvider)
             .startSession(
@@ -97,13 +102,12 @@ final sendTabVmProvider = ViewProvider((ref) {
           return;
         }
 
-        await ref
-            .notifier(sendProvider)
-            .startSession(
-              target: device,
-              files: files,
-              background: false,
-            );
+        await _startSessionWithTransport(
+          ref: ref,
+          target: device,
+          files: files,
+          background: false,
+        );
       }
     },
     onTapSendMode: (context, mode) async {
@@ -145,29 +149,33 @@ final sendTabVmProvider = ViewProvider((ref) {
         return;
       }
 
-      await ref
-          .notifier(sendProvider)
-          .startSession(
-            target: device,
-            files: selectedFiles,
-            background: false,
-          );
+      await _startSessionWithTransport(
+        ref: ref,
+        target: device,
+        files: selectedFiles,
+        background: false,
+      );
     },
     onTapDeviceMultiSend: (context, device) async {
-      final session = ref.read(sendProvider).values.firstWhereOrNull((s) => s.target.ip == device.ip);
+      // Check for existing sessions in either HTTP or iroh provider
+      final httpSession = ref.read(sendProvider).values.firstWhereOrNull((s) => s.target.ip == device.ip);
+      final irohSession = ref.read(irohSendProvider).values.firstWhereOrNull((s) => s.target.ip == device.ip);
+      final session = httpSession ?? irohSession;
+      final isIroh = irohSession != null;
+
       if (session != null) {
         if (session.status == SessionStatus.waiting) {
-          ref.notifier(sendProvider).setBackground(session.sessionId, false);
+          _setBackground(ref, session.sessionId, isIroh, false);
           await context.push(
             () => SendPage(showAppBar: true, closeSessionOnClose: false, sessionId: session.sessionId),
             transition: RouterinoTransition.fade(),
           );
-          ref.notifier(sendProvider).setBackground(session.sessionId, true);
+          _setBackground(ref, session.sessionId, isIroh, true);
           return;
         } else if (session.status == SessionStatus.sending || session.status == SessionStatus.finishedWithErrors) {
-          ref.notifier(sendProvider).setBackground(session.sessionId, false);
+          _setBackground(ref, session.sessionId, isIroh, false);
           await context.push(() => ProgressPage(showAppBar: true, closeSessionOnClose: false, sessionId: session.sessionId));
-          ref.notifier(sendProvider).setBackground(session.sessionId, true);
+          _setBackground(ref, session.sessionId, isIroh, true);
           return;
         }
       }
@@ -180,16 +188,15 @@ final sendTabVmProvider = ViewProvider((ref) {
 
       if (session != null) {
         // close old session
-        ref.notifier(sendProvider).closeSession(session.sessionId);
+        _closeSession(ref, session.sessionId, isIroh);
       }
 
-      await ref
-          .notifier(sendProvider)
-          .startSession(
-            target: device,
-            files: files,
-            background: true,
-          );
+      await _startSessionWithTransport(
+        ref: ref,
+        target: device,
+        files: files,
+        background: true,
+      );
     },
   );
 });
@@ -205,5 +212,54 @@ class SendTabInitAction extends AsyncGlobalAction {
     if (devices.isEmpty) {
       await dispatchAsync(StartSmartScan(forceLegacy: false));
     }
+  }
+}
+
+/// Start a send session using the appropriate transport.
+///
+/// If the target device supports iroh (discovered via multicast with an
+/// iroh ticket), use iroh transport. Otherwise fall back to HTTP v2.
+Future<void> _startSessionWithTransport({
+  required Ref ref,
+  required Device target,
+  required List<CrossFile> files,
+  required bool background,
+}) async {
+  if (target.supportsIroh) {
+    final deviceInfo = ref.read(deviceFullInfoProvider);
+    await ref
+        .notifier(irohSendProvider)
+        .startSession(
+          target: target,
+          files: files,
+          background: background,
+          senderAlias: deviceInfo.alias,
+          senderFingerprint: deviceInfo.fingerprint,
+          version: deviceInfo.version,
+        );
+  } else {
+    await ref
+        .notifier(sendProvider)
+        .startSession(
+          target: target,
+          files: files,
+          background: background,
+        );
+  }
+}
+
+void _setBackground(Ref ref, String sessionId, bool isIroh, bool background) {
+  if (isIroh) {
+    ref.notifier(irohSendProvider).setBackground(sessionId, background);
+  } else {
+    ref.notifier(sendProvider).setBackground(sessionId, background);
+  }
+}
+
+void _closeSession(Ref ref, String sessionId, bool isIroh) {
+  if (isIroh) {
+    ref.notifier(irohSendProvider).closeSession(sessionId);
+  } else {
+    ref.notifier(sendProvider).closeSession(sessionId);
   }
 }

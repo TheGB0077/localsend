@@ -19,6 +19,8 @@ class MulticastDto with MulticastDtoMappable {
   final bool? download; // v2
   final bool? announcement; // v1
   final bool? announce; // v2
+  final String? irohTicket; // iroh transport ticket (per-transfer, optional)
+  final bool? irohCapable; // device supports iroh transport (capability flag)
 
   const MulticastDto({
     required this.alias,
@@ -31,6 +33,8 @@ class MulticastDto with MulticastDtoMappable {
     required this.download,
     required this.announcement,
     required this.announce,
+    required this.irohTicket,
+    required this.irohCapable,
   });
 
   static const fromJson = MulticastDtoMapper.fromJson;
@@ -38,6 +42,14 @@ class MulticastDto with MulticastDtoMappable {
 
 extension MulticastDtoToDeviceExt on MulticastDto {
   Device toDevice(String ip, int ownPort, bool ownHttps) {
+    final discoveryMethods = <DiscoveryMethod>{MulticastDiscovery()};
+
+    // If the device advertises iroh capability, mark it.
+    // A ticket may also be present (per-transfer) — if so, include it.
+    if (irohCapable == true || (irohTicket != null && irohTicket!.isNotEmpty)) {
+      discoveryMethods.add(IrohDiscovery(irohTicket: irohTicket ?? ''));
+    }
+
     return Device(
       signalingId: null,
       ip: ip,
@@ -49,7 +61,7 @@ extension MulticastDtoToDeviceExt on MulticastDto {
       deviceModel: deviceModel,
       deviceType: deviceType ?? DeviceType.desktop,
       download: download ?? false,
-      discoveryMethods: {MulticastDiscovery()},
+      discoveryMethods: discoveryMethods,
     );
   }
 }

@@ -70,7 +70,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 834318689;
+  int get rustContentHash => 1833464994;
 
   static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_localsend_app',
@@ -155,23 +155,7 @@ abstract class RustLibApi extends BaseApi {
     required bool useRelay,
   });
 
-  Future<void> crateApiIrohTransferIrohReceiverShutdown({
-    required RsIrohReceiver receiver,
-  });
-
   Future<void> crateApiIrohTransferIrohSenderCancel({
-    required RsIrohSender sender,
-  });
-
-  Future<String> crateApiIrohTransferIrohSenderCreateTicket({
-    required RsIrohSender sender,
-    required String senderAlias,
-    required String senderFingerprint,
-    required String version,
-    required String filesJson,
-  });
-
-  Future<String> crateApiIrohTransferIrohSenderEndpointAddr({
     required RsIrohSender sender,
   });
 
@@ -185,12 +169,10 @@ abstract class RustLibApi extends BaseApi {
     required bool useRelay,
   });
 
-  Future<void> crateApiIrohTransferIrohSenderServe({
+  Future<String> crateApiIrohTransferIrohSenderStart({
     required RsIrohSender sender,
-  });
-
-  Future<void> crateApiIrohTransferIrohSenderShutdown({
-    required RsIrohSender sender,
+    required String senderInfoJson,
+    required String filesJson,
   });
 
   Future<void> crateApiCryptoVerifyCert({
@@ -757,41 +739,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<void> crateApiIrohTransferIrohReceiverShutdown({
-    required RsIrohReceiver receiver,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsIrohReceiver(
-            receiver,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 14,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiIrohTransferIrohReceiverShutdownConstMeta,
-        argValues: [receiver],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiIrohTransferIrohReceiverShutdownConstMeta => const TaskConstMeta(
-    debugName: 'iroh_receiver_shutdown',
-    argNames: ['receiver'],
-  );
-
-  @override
   Future<void> crateApiIrohTransferIrohSenderCancel({
     required RsIrohSender sender,
   }) {
@@ -806,7 +753,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 14,
             port: port_,
           );
         },
@@ -827,90 +774,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<String> crateApiIrohTransferIrohSenderCreateTicket({
-    required RsIrohSender sender,
-    required String senderAlias,
-    required String senderFingerprint,
-    required String version,
-    required String filesJson,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsIrohSender(
-            sender,
-            serializer,
-          );
-          sse_encode_String(senderAlias, serializer);
-          sse_encode_String(senderFingerprint, serializer);
-          sse_encode_String(version, serializer);
-          sse_encode_String(filesJson, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 16,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiIrohTransferIrohSenderCreateTicketConstMeta,
-        argValues: [sender, senderAlias, senderFingerprint, version, filesJson],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiIrohTransferIrohSenderCreateTicketConstMeta => const TaskConstMeta(
-    debugName: 'iroh_sender_create_ticket',
-    argNames: [
-      'sender',
-      'senderAlias',
-      'senderFingerprint',
-      'version',
-      'filesJson',
-    ],
-  );
-
-  @override
-  Future<String> crateApiIrohTransferIrohSenderEndpointAddr({
-    required RsIrohSender sender,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsIrohSender(
-            sender,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 17,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiIrohTransferIrohSenderEndpointAddrConstMeta,
-        argValues: [sender],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiIrohTransferIrohSenderEndpointAddrConstMeta => const TaskConstMeta(
-    debugName: 'iroh_sender_endpoint_addr',
-    argNames: ['sender'],
-  );
-
-  @override
   Future<String> crateApiIrohTransferIrohSenderImportFile({
     required RsIrohSender sender,
     required String filePath,
@@ -927,7 +790,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 15,
             port: port_,
           );
         },
@@ -961,7 +824,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 16,
             port: port_,
           );
         },
@@ -982,8 +845,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<void> crateApiIrohTransferIrohSenderServe({
+  Future<String> crateApiIrohTransferIrohSenderStart({
     required RsIrohSender sender,
+    required String senderInfoJson,
+    required String filesJson,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -993,62 +858,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sender,
             serializer,
           );
+          sse_encode_String(senderInfoJson, serializer);
+          sse_encode_String(filesJson, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 17,
             port: port_,
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
+          decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_String,
         ),
-        constMeta: kCrateApiIrohTransferIrohSenderServeConstMeta,
-        argValues: [sender],
+        constMeta: kCrateApiIrohTransferIrohSenderStartConstMeta,
+        argValues: [sender, senderInfoJson, filesJson],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiIrohTransferIrohSenderServeConstMeta => const TaskConstMeta(
-    debugName: 'iroh_sender_serve',
-    argNames: ['sender'],
-  );
-
-  @override
-  Future<void> crateApiIrohTransferIrohSenderShutdown({
-    required RsIrohSender sender,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsIrohSender(
-            sender,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 21,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiIrohTransferIrohSenderShutdownConstMeta,
-        argValues: [sender],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiIrohTransferIrohSenderShutdownConstMeta => const TaskConstMeta(
-    debugName: 'iroh_sender_shutdown',
-    argNames: ['sender'],
+  TaskConstMeta get kCrateApiIrohTransferIrohSenderStartConstMeta => const TaskConstMeta(
+    debugName: 'iroh_sender_start',
+    argNames: ['sender', 'senderInfoJson', 'filesJson'],
   );
 
   @override
@@ -1065,7 +897,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 18,
             port: port_,
           );
         },

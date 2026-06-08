@@ -1,6 +1,8 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 // ignore_for_file: type=lint
+// ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: unused_element, unnecessary_cast, override_on_non_overriding_member
 // ignore_for_file: strict_raw_type, inference_failure_on_untyped_parameter
 
@@ -12,7 +14,9 @@ class PrepareUploadRequestDtoMapper extends ClassMapperBase<PrepareUploadRequest
   static PrepareUploadRequestDtoMapper? _instance;
   static PrepareUploadRequestDtoMapper ensureInitialized() {
     if (_instance == null) {
-      MapperContainer.globals.use(_instance = PrepareUploadRequestDtoMapper._());
+      MapperContainer.globals.use(
+        _instance = PrepareUploadRequestDtoMapper._(),
+      );
       InfoRegisterDtoMapper.ensureInitialized();
     }
     return _instance!;
@@ -22,7 +26,10 @@ class PrepareUploadRequestDtoMapper extends ClassMapperBase<PrepareUploadRequest
   final String id = 'PrepareUploadRequestDto';
 
   static InfoRegisterDto _$info(PrepareUploadRequestDto v) => v.info;
-  static const Field<PrepareUploadRequestDto, InfoRegisterDto> _f$info = Field('info', _$info);
+  static const Field<PrepareUploadRequestDto, InfoRegisterDto> _f$info = Field(
+    'info',
+    _$info,
+  );
   static Map<String, FileDto> _$files(PrepareUploadRequestDto v) => v.files;
   static const Field<PrepareUploadRequestDto, Map<String, FileDto>> _f$files = Field('files', _$files);
 
@@ -33,7 +40,10 @@ class PrepareUploadRequestDtoMapper extends ClassMapperBase<PrepareUploadRequest
   };
 
   static PrepareUploadRequestDto _instantiate(DecodingData data) {
-    return PrepareUploadRequestDto(info: data.dec(_f$info), files: data.dec(_f$files));
+    return PrepareUploadRequestDto(
+      info: data.dec(_f$info),
+      files: data.dec(_f$files),
+    );
   }
 
   @override
@@ -58,33 +68,43 @@ mixin PrepareUploadRequestDtoMappable {
   }
 
   PrepareUploadRequestDtoCopyWith<PrepareUploadRequestDto, PrepareUploadRequestDto, PrepareUploadRequestDto> get copyWith =>
-      _PrepareUploadRequestDtoCopyWithImpl(this as PrepareUploadRequestDto, $identity, $identity);
+      _PrepareUploadRequestDtoCopyWithImpl<PrepareUploadRequestDto, PrepareUploadRequestDto>(this as PrepareUploadRequestDto, $identity, $identity);
   @override
   String toString() {
-    return PrepareUploadRequestDtoMapper.ensureInitialized().stringifyValue(this as PrepareUploadRequestDto);
+    return PrepareUploadRequestDtoMapper.ensureInitialized().stringifyValue(
+      this as PrepareUploadRequestDto,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return PrepareUploadRequestDtoMapper.ensureInitialized().equalsValue(this as PrepareUploadRequestDto, other);
+    return PrepareUploadRequestDtoMapper.ensureInitialized().equalsValue(
+      this as PrepareUploadRequestDto,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return PrepareUploadRequestDtoMapper.ensureInitialized().hashValue(this as PrepareUploadRequestDto);
+    return PrepareUploadRequestDtoMapper.ensureInitialized().hashValue(
+      this as PrepareUploadRequestDto,
+    );
   }
 }
 
 extension PrepareUploadRequestDtoValueCopy<$R, $Out> on ObjectCopyWith<$R, PrepareUploadRequestDto, $Out> {
-  PrepareUploadRequestDtoCopyWith<$R, PrepareUploadRequestDto, $Out> get $asPrepareUploadRequestDto =>
-      $base.as((v, t, t2) => _PrepareUploadRequestDtoCopyWithImpl(v, t, t2));
+  PrepareUploadRequestDtoCopyWith<$R, PrepareUploadRequestDto, $Out> get $asPrepareUploadRequestDto => $base.as(
+        (v, t, t2) => _PrepareUploadRequestDtoCopyWithImpl<$R, $Out>(v, t, t2),
+      );
 }
 
 abstract class PrepareUploadRequestDtoCopyWith<$R, $In extends PrepareUploadRequestDto, $Out> implements ClassCopyWith<$R, $In, $Out> {
   InfoRegisterDtoCopyWith<$R, InfoRegisterDto, InfoRegisterDto> get info;
   MapCopyWith<$R, String, FileDto, ObjectCopyWith<$R, FileDto, FileDto>> get files;
   $R call({InfoRegisterDto? info, Map<String, FileDto>? files});
-  PrepareUploadRequestDtoCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+  PrepareUploadRequestDtoCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  );
 }
 
 class _PrepareUploadRequestDtoCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, PrepareUploadRequestDto, $Out>
@@ -96,16 +116,25 @@ class _PrepareUploadRequestDtoCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$
   @override
   InfoRegisterDtoCopyWith<$R, InfoRegisterDto, InfoRegisterDto> get info => $value.info.copyWith.$chain((v) => call(info: v));
   @override
-  MapCopyWith<$R, String, FileDto, ObjectCopyWith<$R, FileDto, FileDto>> get files =>
-      MapCopyWith($value.files, (v, t) => ObjectCopyWith(v, $identity, t), (v) => call(files: v));
+  MapCopyWith<$R, String, FileDto, ObjectCopyWith<$R, FileDto, FileDto>> get files => MapCopyWith(
+        $value.files,
+        (v, t) => ObjectCopyWith(v, $identity, t),
+        (v) => call(files: v),
+      );
   @override
-  $R call({InfoRegisterDto? info, Map<String, FileDto>? files}) =>
-      $apply(FieldCopyWithData({if (info != null) #info: info, if (files != null) #files: files}));
+  $R call({InfoRegisterDto? info, Map<String, FileDto>? files}) => $apply(
+        FieldCopyWithData({
+          if (info != null) #info: info,
+          if (files != null) #files: files,
+        }),
+      );
   @override
-  PrepareUploadRequestDto $make(CopyWithData data) =>
-      PrepareUploadRequestDto(info: data.get(#info, or: $value.info), files: data.get(#files, or: $value.files));
+  PrepareUploadRequestDto $make(CopyWithData data) => PrepareUploadRequestDto(
+        info: data.get(#info, or: $value.info),
+        files: data.get(#files, or: $value.files),
+      );
 
   @override
   PrepareUploadRequestDtoCopyWith<$R2, PrepareUploadRequestDto, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
-      _PrepareUploadRequestDtoCopyWithImpl($value, $cast, t);
+      _PrepareUploadRequestDtoCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

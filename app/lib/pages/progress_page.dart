@@ -10,8 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/state/server/receive_session_state.dart';
+import 'package:localsend_app/model/state/send/send_session_state.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
+import 'package:localsend_app/provider/network/transfer/iroh_receive_provider.dart';
+import 'package:localsend_app/provider/network/transfer/iroh_send_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/util/file_size_helper.dart';
@@ -61,6 +64,22 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
 
   bool _advanced = false;
 
+  /// Resolve the receive session from either HTTP or iroh provider.
+  ReceiveSessionState? get _receiveSession => ref.read(serverProvider)?.session ?? ref.read(irohReceiveProvider).session;
+
+  /// Resolve the send session from either HTTP or iroh provider.
+  SendSessionState? get _sendSession => ref.read(sendProvider)[widget.sessionId] ?? ref.read(irohSendProvider)[widget.sessionId];
+
+  /// Watch the receive session from either provider.
+  ReceiveSessionState? get _watchedReceiveSession => ref.watch(serverProvider.select((s) => s?.session)) ?? ref.watch(irohReceiveProvider).session;
+
+  /// Watch the send session from either provider.
+  SendSessionState? get _watchedSendSession => ref.watch(sendProvider)[widget.sessionId] ?? ref.watch(irohSendProvider)[widget.sessionId];
+
+  /// Whether this is an iroh session.
+  bool get _isIrohSend => ref.read(irohSendProvider).containsKey(widget.sessionId);
+  bool get _isIrohReceive => ref.read(irohReceiveProvider).session != null;
+
   @override
   void initState() {
     super.initState();
@@ -74,8 +93,8 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
       // Periodically call WakelockPlus.enable() to keep the screen awake
       _wakelockPlusTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
         final finished =
-            ref.read(serverProvider)?.session?.files.values.map((e) => e.status).isFinishedOrSkipped ??
-            ref.read(sendProvider)[widget.sessionId]?.files.values.map((e) => e.status).isFinishedOrSkipped ??
+            _receiveSession?.files.values.map((e) => e.status).isFinishedOrSkipped ??
+            _sendSession?.files.values.map((e) => e.status).isFinishedOrSkipped ??
             true;
         if (finished) {
           timer.cancel();
@@ -92,8 +111,8 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
       if (ref.read(settingsProvider).autoFinish) {
         _finishTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           final finished =
-              ref.read(serverProvider)?.session?.files.values.map((e) => e.status).isFinishedOrSkipped ??
-              ref.read(sendProvider)[widget.sessionId]?.files.values.map((e) => e.status).isFinishedOrSkipped ??
+              _receiveSession?.files.values.map((e) => e.status).isFinishedOrSkipped ??
+              _sendSession?.files.values.map((e) => e.status).isFinishedOrSkipped ??
               true;
           if (finished) {
             if (_finishCounter == 1) {
@@ -109,14 +128,14 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
       }
 
       setState(() {
-        final receiveSession = ref.read(serverProvider)?.session;
+        final receiveSession = _receiveSession;
         if (receiveSession != null) {
           _files = receiveSession.files.values.map((f) => f.file).toList();
 
           // We previously used f.token != null here, but this may not work on very fast networks.
           _selectedFiles = receiveSession.files.values.where((f) => f.status != FileStatus.skipped).map((f) => f.file.id).toSet();
         } else {
-          final sendSession = ref.read(sendProvider)[widget.sessionId];
+          final sendSession = _sendSession;
           if (sendSession != null) {
             _files = sendSession.files.values.map((f) => f.file).toList();
             _selectedFiles = sendSession.files.values.where((f) => f.status != FileStatus.skipped).map((f) => f.file.id).toSet();
@@ -129,8 +148,8 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
   }
 
   void _exit({required bool closeSession}) async {
-    final receiveSession = ref.read(serverProvider.select((s) => s?.session));
-    final sendSession = ref.read(sendProvider)[widget.sessionId];
+    final receiveSession = _receiveSession;
+    final sendSession = _sendSession;
     final SessionStatus? status = receiveSession?.status ?? sendSession?.status;
     final keepSession = !closeSession && (status == SessionStatus.sending || status == SessionStatus.finishedWithErrors);
     final result = status == null || keepSession || await _askCancelConfirmation(status);
@@ -147,20 +166,36 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
       false => true,
     };
     if (result) {
-      final receiveSession = ref.read(serverProvider)?.session;
-      final sendState = ref.read(sendProvider)[widget.sessionId];
+      final receiveSession = _receiveSession;
+      final sendState = _sendSession;
 
       if (receiveSession != null) {
-        if (receiveSession.status == SessionStatus.sending) {
-          ref.notifier(serverProvider).cancelSession();
+        if (_isIrohReceive) {
+          if (receiveSession.status == SessionStatus.sending) {
+            ref.notifier(irohReceiveProvider).cancelSession();
+          } else {
+            ref.notifier(irohReceiveProvider).closeSession();
+          }
         } else {
-          ref.notifier(serverProvider).closeSession();
+          if (receiveSession.status == SessionStatus.sending) {
+            ref.notifier(serverProvider).cancelSession();
+          } else {
+            ref.notifier(serverProvider).closeSession();
+          }
         }
       } else if (sendState != null) {
-        if (sendState.status == SessionStatus.sending) {
-          ref.notifier(sendProvider).cancelSession(widget.sessionId);
+        if (_isIrohSend) {
+          if (sendState.status == SessionStatus.sending) {
+            await ref.notifier(irohSendProvider).cancelSession(widget.sessionId);
+          } else {
+            ref.notifier(irohSendProvider).closeSession(widget.sessionId);
+          }
         } else {
-          ref.notifier(sendProvider).closeSession(widget.sessionId);
+          if (sendState.status == SessionStatus.sending) {
+            ref.notifier(sendProvider).cancelSession(widget.sessionId);
+          } else {
+            ref.notifier(sendProvider).closeSession(widget.sessionId);
+          }
         }
       }
     }
@@ -186,8 +221,8 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
       (prev, curr) => prev + ((progressNotifier.getProgress(sessionId: widget.sessionId, fileId: curr.id) * curr.size).round()),
     );
 
-    final receiveSession = ref.watch(serverProvider.select((s) => s?.session));
-    final sendSession = ref.watch(sendProvider)[widget.sessionId];
+    final receiveSession = _watchedReceiveSession;
+    final sendSession = _watchedSendSession;
 
     final SessionState? commonSessionState = receiveSession ?? sendSession;
 
@@ -261,7 +296,30 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: Theme.of(context).textTheme.titleLarge),
+                        Row(
+                          children: [
+                            Text(title, style: Theme.of(context).textTheme.titleLarge),
+                            if (_isIrohSend || _isIrohReceive)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Iroh',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                         if (checkPlatformWithFileSystem() && receiveSession != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 10),
@@ -410,7 +468,7 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
                             ],
                           ),
                         ),
-                        if (sendSession != null && fileStatus == FileStatus.failed)
+                        if (sendSession != null && fileStatus == FileStatus.failed && !_isIrohSend)
                           IconButton(
                             icon: const Icon(Icons.refresh),
                             onPressed: () async {

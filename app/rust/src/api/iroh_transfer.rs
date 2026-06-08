@@ -1,3 +1,4 @@
+use localsend::iroh::peer_resolver::{IrohMulticastMessage, PeerResolver};
 use localsend::iroh::provider::LocalSendProvider;
 use localsend::iroh::receiver::LocalSendReceiver;
 use localsend::iroh::LocalSendFileMeta;
@@ -8,98 +9,160 @@ use tokio::sync::Mutex;
 /// Opaque handle to a sender (provider) session.
 pub struct RsIrohSender {
     inner: Arc<Mutex<LocalSendProvider>>,
+    peer_resolver: Arc<PeerResolver>,
 }
 
 /// Opaque handle to a receiver session.
+/// No PeerResolver — discovery is handled by the existing Dart multicast listener.
+/// The ticket comes from the Device model (IrohDiscovery).
 pub struct RsIrohReceiver {
     inner: Arc<Mutex<LocalSendReceiver>>,
 }
 
-/// Create a new sender session. Files will be imported into a blob store
-/// at the given data directory.
+// ─── Sender FFI ─────────────────────────────────────────────────────
+
+/// Create a new sender session.
 ///
-/// Set `use_relay` to true for internet transfers (uses n0 relay servers).
-/// Set to false for LAN-only transfers.
+/// - `data_dir`: path for the blob store
+/// - `use_relay`: true for internet transfers (n0 relay), false for LAN-only
 pub async fn iroh_sender_new(data_dir: String, use_relay: bool) -> Result<RsIrohSender, String> {
     let provider = LocalSendProvider::new(PathBuf::from(data_dir), use_relay)
         .await
         .map_err(|e| e.to_string())?;
+    let peer_resolver = PeerResolver::new().await.map_err(|e| e.to_string())?;
     Ok(RsIrohSender {
         inner: Arc::new(Mutex::new(provider)),
+        peer_resolver: Arc::new(peer_resolver),
     })
 }
 
-/// Import a file into the blob store. Returns "hash_hex:file_size".
+/// Import a file into the blob store.
+///
+/// Handles `content://` URIs on Android by opening the SAF fd and creating
+/// a `/proc/self/fd/N` path for zero-copy mmap import (no full-file read
+/// into memory). Returns "hash_hex:file_size".
 pub async fn iroh_sender_import_file(
     sender: &RsIrohSender,
     file_path: String,
 ) -> Result<String, String> {
     let mut guard = sender.inner.lock().await;
-    let (hash_hex, size) = guard
-        .import_file(&PathBuf::from(file_path))
-        .await
-        .map_err(|e| e.to_string())?;
+
+    let (hash_hex, size) = if file_path.starts_with("content://") {
+        #[cfg(target_os = "android")]
+        {
+            let (path, _file_handle) = crate::api::saf::open_uri_as_path(&file_path)?;
+            guard.import_file(&path).await.map_err(|e| e.to_string())?
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            return Err("content:// URIs are only supported on Android".to_string());
+        }
+    } else {
+        guard
+            .import_file(&PathBuf::from(&file_path))
+            .await
+            .map_err(|e| e.to_string())?
+    };
+
     Ok(format!("{}:{}", hash_hex, size))
 }
 
-/// Create a ticket for the imported collection.
+/// Start the sender: create a ticket from imported files, begin serving blobs,
+/// and broadcast the ticket over multicast.
 ///
-/// `files_json` is a JSON array: [{"fileName":"...","size":123,"fileType":"...","hash":"...","lastModified":null}]
-pub async fn iroh_sender_create_ticket(
+/// Spawns serving and announcing in background tokio tasks and returns
+/// immediately with the ticket string.
+///
+/// `files_json`: JSON array of `LocalSendFileMeta` objects.
+/// `sender_info_json`: JSON object with `alias`, `fingerprint`, `version`, `port`, `protocol` fields.
+pub async fn iroh_sender_start(
     sender: &RsIrohSender,
-    sender_alias: String,
-    sender_fingerprint: String,
-    version: String,
+    sender_info_json: String,
     files_json: String,
 ) -> Result<String, String> {
-    let guard = sender.inner.lock().await;
-
+    // Parse file metadata
     let files: Vec<LocalSendFileMeta> =
         serde_json::from_str(&files_json).map_err(|e: serde_json::Error| e.to_string())?;
 
+    // Parse sender info
+    let info: serde_json::Value =
+        serde_json::from_str(&sender_info_json).map_err(|e: serde_json::Error| e.to_string())?;
+
+    let sender_alias = info["alias"].as_str().unwrap_or("").to_string();
+    let sender_fingerprint = info["fingerprint"].as_str().unwrap_or("").to_string();
+    let version = info["version"].as_str().unwrap_or("").to_string();
+    let port = info["port"].as_u64().unwrap_or(53317) as u16;
+    let protocol = info["protocol"].as_str().map(|s| s.to_string());
+
+    // Create collection + ticket
     let collection = localsend::iroh::LocalSendCollection {
-        sender_alias,
-        sender_fingerprint,
-        version,
+        sender_alias: sender_alias.clone(),
+        sender_fingerprint: sender_fingerprint.clone(),
+        version: version.clone(),
         files,
     };
 
-    guard
-        .create_ticket(&collection)
+    let ticket = {
+        let guard = sender.inner.lock().await;
+        guard.create_ticket(&collection).await.map_err(|e| e.to_string())?
+    };
+
+    // Spawn serving in background
+    {
+        let inner = sender.inner.clone();
+        tokio::spawn(async move {
+            let guard = inner.lock().await;
+            if let Err(e) = guard.serve().await {
+                tracing::error!("Sender serve error: {e}");
+            }
+        });
+    }
+
+    // Broadcast ticket over multicast (separate socket, doesn't conflict
+    // with the Dart multicast listener which binds to port 53317 for receiving).
+    // Our PeerResolver binds to an ephemeral port for sending.
+    let msg = IrohMulticastMessage {
+        alias: sender_alias,
+        fingerprint: sender_fingerprint,
+        version,
+        device_model: info["deviceModel"].as_str().map(|s| s.to_string()),
+        device_type: info["deviceType"].as_str().map(|s| s.to_string()),
+        port,
+        protocol,
+        announce: true,
+        iroh_ticket: Some(ticket.clone()),
+    };
+
+    sender
+        .peer_resolver
+        .announce_burst(
+            &msg,
+            &[
+                std::time::Duration::from_millis(100),
+                std::time::Duration::from_millis(500),
+                std::time::Duration::from_millis(2000),
+            ],
+        )
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+
+    Ok(ticket)
 }
 
-/// Get the endpoint address as a JSON string.
-pub async fn iroh_sender_endpoint_addr(sender: &RsIrohSender) -> Result<String, String> {
-    let guard = sender.inner.lock().await;
-    let addr = guard.endpoint_addr();
-    serde_json::to_string(&addr).map_err(|e: serde_json::Error| e.to_string())
-}
-
-/// Start serving blobs in the background. Blocks until cancelled.
-pub async fn iroh_sender_serve(sender: &RsIrohSender) -> Result<(), String> {
-    let guard = sender.inner.lock().await;
-    guard.serve().await.map_err(|e| e.to_string())
-}
-
-/// Cancel the sender session.
+/// Cancel the sender session (stops serving and announcing).
 pub async fn iroh_sender_cancel(sender: &RsIrohSender) -> Result<(), String> {
     let guard = sender.inner.lock().await;
     guard.cancel();
+    sender.peer_resolver.cancel();
     Ok(())
 }
 
-/// Shut down the sender and clean up the blob store.
-pub async fn iroh_sender_shutdown(sender: &RsIrohSender) -> Result<(), String> {
-    // Take ownership by swapping with a dummy, then shutdown.
-    // We can't move out of Arc<Mutex<>>, so we just cancel.
-    let guard = sender.inner.lock().await;
-    guard.cancel();
-    Ok(())
-}
+// ─── Receiver FFI ───────────────────────────────────────────────────
 
 /// Create a new receiver session.
+///
+/// No peer discovery — the ticket comes from the Device model (IrohDiscovery)
+/// which is populated by the existing Dart multicast listener.
 pub async fn iroh_receiver_new(use_relay: bool) -> Result<RsIrohReceiver, String> {
     let receiver = LocalSendReceiver::new(use_relay)
         .await
@@ -109,8 +172,11 @@ pub async fn iroh_receiver_new(use_relay: bool) -> Result<RsIrohReceiver, String
     })
 }
 
-/// Fetch the collection metadata from the provider using the ticket.
-/// Returns the LocalSendCollection as JSON.
+/// Fetch the collection metadata from a provider using a ticket.
+///
+/// `ticket`: the iroh ticket from a Device's IrohDiscovery (obtained via
+/// the existing Dart multicast discovery flow).
+/// Returns the `LocalSendCollection` as JSON (contains sender info + file list).
 pub async fn iroh_receiver_fetch_collection(
     receiver: &RsIrohReceiver,
     ticket: String,
@@ -125,8 +191,9 @@ pub async fn iroh_receiver_fetch_collection(
 
 /// Download selected files from the provider.
 ///
-/// `file_indices_json` is a JSON array of indices into the collection's file list.
-/// `output_dir` is where files will be exported.
+/// - `ticket`: the iroh ticket
+/// - `file_indices_json`: JSON array of 0-based indices into the collection's file list
+/// - `output_dir`: directory to save files to
 /// Returns total bytes downloaded.
 pub async fn iroh_receiver_download(
     receiver: &RsIrohReceiver,
@@ -148,13 +215,6 @@ pub async fn iroh_receiver_download(
 
 /// Cancel the receiver session.
 pub async fn iroh_receiver_cancel(receiver: &RsIrohReceiver) -> Result<(), String> {
-    let guard = receiver.inner.lock().await;
-    guard.cancel();
-    Ok(())
-}
-
-/// Shut down the receiver and clean up.
-pub async fn iroh_receiver_shutdown(receiver: &RsIrohReceiver) -> Result<(), String> {
     let guard = receiver.inner.lock().await;
     guard.cancel();
     Ok(())

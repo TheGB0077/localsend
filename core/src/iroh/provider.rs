@@ -92,6 +92,26 @@ impl LocalSendProvider {
         Ok((hash_hex, size))
     }
 
+    /// Import raw bytes into the blob store. Used for Android SAF content://
+    /// URIs where we have the data in memory but no filesystem path.
+    /// Returns the BLAKE3 hash (hex) and size.
+    pub async fn import_bytes(&mut self, data: bytes::Bytes) -> Result<(String, u64)> {
+        let size = data.len() as u64;
+        let tt = self
+            .store
+            .add_bytes(data)
+            .temp_tag()
+            .await
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
+
+        let hash = tt.hash();
+        let hash_hex = hash.to_hex().to_string();
+
+        tracing::info!("Imported bytes -> {} ({} bytes)", hash_hex, size);
+        self.temp_tags.push(tt);
+        Ok((hash_hex, size))
+    }
+
     /// Create an iroh Collection from the imported files and generate a ticket
     /// that the receiver can use to connect and download.
     ///

@@ -1,6 +1,8 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 // ignore_for_file: type=lint
+// ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: unused_element, unnecessary_cast, override_on_non_overriding_member
 // ignore_for_file: strict_raw_type, inference_failure_on_untyped_parameter
 
@@ -25,15 +27,15 @@ class DeviceTypeMapper extends EnumMapper<DeviceType> {
   @override
   DeviceType decode(dynamic value) {
     switch (value) {
-      case 'mobile':
+      case r'mobile':
         return DeviceType.mobile;
-      case 'desktop':
+      case r'desktop':
         return DeviceType.desktop;
-      case 'web':
+      case r'web':
         return DeviceType.web;
-      case 'headless':
+      case r'headless':
         return DeviceType.headless;
-      case 'server':
+      case r'server':
         return DeviceType.server;
       default:
         return DeviceType.values[1];
@@ -44,15 +46,15 @@ class DeviceTypeMapper extends EnumMapper<DeviceType> {
   dynamic encode(DeviceType self) {
     switch (self) {
       case DeviceType.mobile:
-        return 'mobile';
+        return r'mobile';
       case DeviceType.desktop:
-        return 'desktop';
+        return r'desktop';
       case DeviceType.web:
-        return 'web';
+        return r'web';
       case DeviceType.headless:
-        return 'headless';
+        return r'headless';
       case DeviceType.server:
-        return 'server';
+        return r'server';
     }
   }
 }
@@ -73,7 +75,7 @@ class DiscoveryMethodMapper extends ClassMapperBase<DiscoveryMethod> {
       MapperContainer.globals.use(_instance = DiscoveryMethodMapper._());
       MulticastDiscoveryMapper.ensureInitialized();
       HttpDiscoveryMapper.ensureInitialized();
-      SignalingDiscoveryMapper.ensureInitialized();
+      IrohDiscoveryMapper.ensureInitialized();
     }
     return _instance!;
   }
@@ -108,7 +110,9 @@ mixin DiscoveryMethodMappable {
 
 abstract class DiscoveryMethodCopyWith<$R, $In extends DiscoveryMethod, $Out> implements ClassCopyWith<$R, $In, $Out> {
   $R call();
-  DiscoveryMethodCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+  DiscoveryMethodCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  );
 }
 
 class MulticastDiscoveryMapper extends ClassMapperBase<MulticastDiscovery> {
@@ -155,32 +159,46 @@ mixin MulticastDiscoveryMappable {
   }
 
   MulticastDiscoveryCopyWith<MulticastDiscovery, MulticastDiscovery, MulticastDiscovery> get copyWith =>
-      _MulticastDiscoveryCopyWithImpl(this as MulticastDiscovery, $identity, $identity);
+      _MulticastDiscoveryCopyWithImpl<MulticastDiscovery, MulticastDiscovery>(
+        this as MulticastDiscovery,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return MulticastDiscoveryMapper.ensureInitialized().stringifyValue(this as MulticastDiscovery);
+    return MulticastDiscoveryMapper.ensureInitialized().stringifyValue(
+      this as MulticastDiscovery,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return MulticastDiscoveryMapper.ensureInitialized().equalsValue(this as MulticastDiscovery, other);
+    return MulticastDiscoveryMapper.ensureInitialized().equalsValue(
+      this as MulticastDiscovery,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return MulticastDiscoveryMapper.ensureInitialized().hashValue(this as MulticastDiscovery);
+    return MulticastDiscoveryMapper.ensureInitialized().hashValue(
+      this as MulticastDiscovery,
+    );
   }
 }
 
 extension MulticastDiscoveryValueCopy<$R, $Out> on ObjectCopyWith<$R, MulticastDiscovery, $Out> {
-  MulticastDiscoveryCopyWith<$R, MulticastDiscovery, $Out> get $asMulticastDiscovery =>
-      $base.as((v, t, t2) => _MulticastDiscoveryCopyWithImpl(v, t, t2));
+  MulticastDiscoveryCopyWith<$R, MulticastDiscovery, $Out> get $asMulticastDiscovery => $base.as(
+        (v, t, t2) => _MulticastDiscoveryCopyWithImpl<$R, $Out>(v, t, t2),
+      );
 }
 
 abstract class MulticastDiscoveryCopyWith<$R, $In extends MulticastDiscovery, $Out> implements DiscoveryMethodCopyWith<$R, $In, $Out> {
   @override
   $R call();
-  MulticastDiscoveryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+  MulticastDiscoveryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  );
 }
 
 class _MulticastDiscoveryCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, MulticastDiscovery, $Out>
@@ -195,8 +213,10 @@ class _MulticastDiscoveryCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Mu
   MulticastDiscovery $make(CopyWithData data) => MulticastDiscovery();
 
   @override
-  MulticastDiscoveryCopyWith<$R2, MulticastDiscovery, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
-      _MulticastDiscoveryCopyWithImpl($value, $cast, t);
+  MulticastDiscoveryCopyWith<$R2, MulticastDiscovery, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  ) =>
+      _MulticastDiscoveryCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
 
 class HttpDiscoveryMapper extends ClassMapperBase<HttpDiscovery> {
@@ -218,9 +238,7 @@ class HttpDiscoveryMapper extends ClassMapperBase<HttpDiscovery> {
   static const Field<HttpDiscovery, String> _f$ip = Field('ip', _$ip);
 
   @override
-  final MappableFields<HttpDiscovery> fields = const {
-    #ip: _f$ip,
-  };
+  final MappableFields<HttpDiscovery> fields = const {#ip: _f$ip};
 
   static HttpDiscovery _instantiate(DecodingData data) {
     return HttpDiscovery(ip: data.dec(_f$ip));
@@ -240,33 +258,47 @@ class HttpDiscoveryMapper extends ClassMapperBase<HttpDiscovery> {
 
 mixin HttpDiscoveryMappable {
   String serialize() {
-    return HttpDiscoveryMapper.ensureInitialized().encodeJson<HttpDiscovery>(this as HttpDiscovery);
+    return HttpDiscoveryMapper.ensureInitialized().encodeJson<HttpDiscovery>(
+      this as HttpDiscovery,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return HttpDiscoveryMapper.ensureInitialized().encodeMap<HttpDiscovery>(this as HttpDiscovery);
+    return HttpDiscoveryMapper.ensureInitialized().encodeMap<HttpDiscovery>(
+      this as HttpDiscovery,
+    );
   }
 
-  HttpDiscoveryCopyWith<HttpDiscovery, HttpDiscovery, HttpDiscovery> get copyWith =>
-      _HttpDiscoveryCopyWithImpl(this as HttpDiscovery, $identity, $identity);
+  HttpDiscoveryCopyWith<HttpDiscovery, HttpDiscovery, HttpDiscovery> get copyWith => _HttpDiscoveryCopyWithImpl<HttpDiscovery, HttpDiscovery>(
+        this as HttpDiscovery,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return HttpDiscoveryMapper.ensureInitialized().stringifyValue(this as HttpDiscovery);
+    return HttpDiscoveryMapper.ensureInitialized().stringifyValue(
+      this as HttpDiscovery,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return HttpDiscoveryMapper.ensureInitialized().equalsValue(this as HttpDiscovery, other);
+    return HttpDiscoveryMapper.ensureInitialized().equalsValue(
+      this as HttpDiscovery,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return HttpDiscoveryMapper.ensureInitialized().hashValue(this as HttpDiscovery);
+    return HttpDiscoveryMapper.ensureInitialized().hashValue(
+      this as HttpDiscovery,
+    );
   }
 }
 
 extension HttpDiscoveryValueCopy<$R, $Out> on ObjectCopyWith<$R, HttpDiscovery, $Out> {
-  HttpDiscoveryCopyWith<$R, HttpDiscovery, $Out> get $asHttpDiscovery => $base.as((v, t, t2) => _HttpDiscoveryCopyWithImpl(v, t, t2));
+  HttpDiscoveryCopyWith<$R, HttpDiscovery, $Out> get $asHttpDiscovery => $base.as((v, t, t2) => _HttpDiscoveryCopyWithImpl<$R, $Out>(v, t, t2));
 }
 
 abstract class HttpDiscoveryCopyWith<$R, $In extends HttpDiscovery, $Out> implements DiscoveryMethodCopyWith<$R, $In, $Out> {
@@ -287,100 +319,123 @@ class _HttpDiscoveryCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, HttpDis
   HttpDiscovery $make(CopyWithData data) => HttpDiscovery(ip: data.get(#ip, or: $value.ip));
 
   @override
-  HttpDiscoveryCopyWith<$R2, HttpDiscovery, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) => _HttpDiscoveryCopyWithImpl($value, $cast, t);
+  HttpDiscoveryCopyWith<$R2, HttpDiscovery, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  ) =>
+      _HttpDiscoveryCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
 
-class SignalingDiscoveryMapper extends ClassMapperBase<SignalingDiscovery> {
-  SignalingDiscoveryMapper._();
+class IrohDiscoveryMapper extends ClassMapperBase<IrohDiscovery> {
+  IrohDiscoveryMapper._();
 
-  static SignalingDiscoveryMapper? _instance;
-  static SignalingDiscoveryMapper ensureInitialized() {
+  static IrohDiscoveryMapper? _instance;
+  static IrohDiscoveryMapper ensureInitialized() {
     if (_instance == null) {
-      MapperContainer.globals.use(_instance = SignalingDiscoveryMapper._());
+      MapperContainer.globals.use(_instance = IrohDiscoveryMapper._());
       DiscoveryMethodMapper.ensureInitialized();
     }
     return _instance!;
   }
 
   @override
-  final String id = 'SignalingDiscovery';
+  final String id = 'IrohDiscovery';
 
-  static String _$signalingServer(SignalingDiscovery v) => v.signalingServer;
-  static const Field<SignalingDiscovery, String> _f$signalingServer = Field('signalingServer', _$signalingServer);
+  static String _$irohTicket(IrohDiscovery v) => v.irohTicket;
+  static const Field<IrohDiscovery, String> _f$irohTicket = Field(
+    'irohTicket',
+    _$irohTicket,
+  );
 
   @override
-  final MappableFields<SignalingDiscovery> fields = const {
-    #signalingServer: _f$signalingServer,
+  final MappableFields<IrohDiscovery> fields = const {
+    #irohTicket: _f$irohTicket,
   };
 
-  static SignalingDiscovery _instantiate(DecodingData data) {
-    return SignalingDiscovery(signalingServer: data.dec(_f$signalingServer));
+  static IrohDiscovery _instantiate(DecodingData data) {
+    return IrohDiscovery(irohTicket: data.dec(_f$irohTicket));
   }
 
   @override
   final Function instantiate = _instantiate;
 
-  static SignalingDiscovery fromJson(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<SignalingDiscovery>(map);
+  static IrohDiscovery fromJson(Map<String, dynamic> map) {
+    return ensureInitialized().decodeMap<IrohDiscovery>(map);
   }
 
-  static SignalingDiscovery deserialize(String json) {
-    return ensureInitialized().decodeJson<SignalingDiscovery>(json);
+  static IrohDiscovery deserialize(String json) {
+    return ensureInitialized().decodeJson<IrohDiscovery>(json);
   }
 }
 
-mixin SignalingDiscoveryMappable {
+mixin IrohDiscoveryMappable {
   String serialize() {
-    return SignalingDiscoveryMapper.ensureInitialized().encodeJson<SignalingDiscovery>(this as SignalingDiscovery);
+    return IrohDiscoveryMapper.ensureInitialized().encodeJson<IrohDiscovery>(
+      this as IrohDiscovery,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return SignalingDiscoveryMapper.ensureInitialized().encodeMap<SignalingDiscovery>(this as SignalingDiscovery);
+    return IrohDiscoveryMapper.ensureInitialized().encodeMap<IrohDiscovery>(
+      this as IrohDiscovery,
+    );
   }
 
-  SignalingDiscoveryCopyWith<SignalingDiscovery, SignalingDiscovery, SignalingDiscovery> get copyWith =>
-      _SignalingDiscoveryCopyWithImpl(this as SignalingDiscovery, $identity, $identity);
+  IrohDiscoveryCopyWith<IrohDiscovery, IrohDiscovery, IrohDiscovery> get copyWith => _IrohDiscoveryCopyWithImpl<IrohDiscovery, IrohDiscovery>(
+        this as IrohDiscovery,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return SignalingDiscoveryMapper.ensureInitialized().stringifyValue(this as SignalingDiscovery);
+    return IrohDiscoveryMapper.ensureInitialized().stringifyValue(
+      this as IrohDiscovery,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return SignalingDiscoveryMapper.ensureInitialized().equalsValue(this as SignalingDiscovery, other);
+    return IrohDiscoveryMapper.ensureInitialized().equalsValue(
+      this as IrohDiscovery,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return SignalingDiscoveryMapper.ensureInitialized().hashValue(this as SignalingDiscovery);
+    return IrohDiscoveryMapper.ensureInitialized().hashValue(
+      this as IrohDiscovery,
+    );
   }
 }
 
-extension SignalingDiscoveryValueCopy<$R, $Out> on ObjectCopyWith<$R, SignalingDiscovery, $Out> {
-  SignalingDiscoveryCopyWith<$R, SignalingDiscovery, $Out> get $asSignalingDiscovery =>
-      $base.as((v, t, t2) => _SignalingDiscoveryCopyWithImpl(v, t, t2));
+extension IrohDiscoveryValueCopy<$R, $Out> on ObjectCopyWith<$R, IrohDiscovery, $Out> {
+  IrohDiscoveryCopyWith<$R, IrohDiscovery, $Out> get $asIrohDiscovery => $base.as((v, t, t2) => _IrohDiscoveryCopyWithImpl<$R, $Out>(v, t, t2));
 }
 
-abstract class SignalingDiscoveryCopyWith<$R, $In extends SignalingDiscovery, $Out> implements DiscoveryMethodCopyWith<$R, $In, $Out> {
+abstract class IrohDiscoveryCopyWith<$R, $In extends IrohDiscovery, $Out> implements DiscoveryMethodCopyWith<$R, $In, $Out> {
   @override
-  $R call({String? signalingServer});
-  SignalingDiscoveryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+  $R call({String? irohTicket});
+  IrohDiscoveryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
-class _SignalingDiscoveryCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, SignalingDiscovery, $Out>
-    implements SignalingDiscoveryCopyWith<$R, SignalingDiscovery, $Out> {
-  _SignalingDiscoveryCopyWithImpl(super.value, super.then, super.then2);
+class _IrohDiscoveryCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, IrohDiscovery, $Out>
+    implements IrohDiscoveryCopyWith<$R, IrohDiscovery, $Out> {
+  _IrohDiscoveryCopyWithImpl(super.value, super.then, super.then2);
 
   @override
-  late final ClassMapperBase<SignalingDiscovery> $mapper = SignalingDiscoveryMapper.ensureInitialized();
+  late final ClassMapperBase<IrohDiscovery> $mapper = IrohDiscoveryMapper.ensureInitialized();
   @override
-  $R call({String? signalingServer}) => $apply(FieldCopyWithData({if (signalingServer != null) #signalingServer: signalingServer}));
+  $R call({String? irohTicket}) => $apply(
+        FieldCopyWithData({if (irohTicket != null) #irohTicket: irohTicket}),
+      );
   @override
-  SignalingDiscovery $make(CopyWithData data) => SignalingDiscovery(signalingServer: data.get(#signalingServer, or: $value.signalingServer));
+  IrohDiscovery $make(CopyWithData data) => IrohDiscovery(irohTicket: data.get(#irohTicket, or: $value.irohTicket));
 
   @override
-  SignalingDiscoveryCopyWith<$R2, SignalingDiscovery, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
-      _SignalingDiscoveryCopyWithImpl($value, $cast, t);
+  IrohDiscoveryCopyWith<$R2, IrohDiscovery, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  ) =>
+      _IrohDiscoveryCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
 
 class DeviceMapper extends ClassMapperBase<Device> {
@@ -400,7 +455,10 @@ class DeviceMapper extends ClassMapperBase<Device> {
   final String id = 'Device';
 
   static String? _$signalingId(Device v) => v.signalingId;
-  static const Field<Device, String> _f$signalingId = Field('signalingId', _$signalingId);
+  static const Field<Device, String> _f$signalingId = Field(
+    'signalingId',
+    _$signalingId,
+  );
   static String? _$ip(Device v) => v.ip;
   static const Field<Device, String> _f$ip = Field('ip', _$ip);
   static String _$version(Device v) => v.version;
@@ -410,17 +468,29 @@ class DeviceMapper extends ClassMapperBase<Device> {
   static bool _$https(Device v) => v.https;
   static const Field<Device, bool> _f$https = Field('https', _$https);
   static String _$fingerprint(Device v) => v.fingerprint;
-  static const Field<Device, String> _f$fingerprint = Field('fingerprint', _$fingerprint);
+  static const Field<Device, String> _f$fingerprint = Field(
+    'fingerprint',
+    _$fingerprint,
+  );
   static String _$alias(Device v) => v.alias;
   static const Field<Device, String> _f$alias = Field('alias', _$alias);
   static String? _$deviceModel(Device v) => v.deviceModel;
-  static const Field<Device, String> _f$deviceModel = Field('deviceModel', _$deviceModel);
+  static const Field<Device, String> _f$deviceModel = Field(
+    'deviceModel',
+    _$deviceModel,
+  );
   static DeviceType _$deviceType(Device v) => v.deviceType;
-  static const Field<Device, DeviceType> _f$deviceType = Field('deviceType', _$deviceType);
+  static const Field<Device, DeviceType> _f$deviceType = Field(
+    'deviceType',
+    _$deviceType,
+  );
   static bool _$download(Device v) => v.download;
   static const Field<Device, bool> _f$download = Field('download', _$download);
   static Set<DiscoveryMethod> _$discoveryMethods(Device v) => v.discoveryMethods;
-  static const Field<Device, Set<DiscoveryMethod>> _f$discoveryMethods = Field('discoveryMethods', _$discoveryMethods);
+  static const Field<Device, Set<DiscoveryMethod>> _f$discoveryMethods = Field(
+    'discoveryMethods',
+    _$discoveryMethods,
+  );
 
   @override
   final MappableFields<Device> fields = const {
@@ -439,17 +509,18 @@ class DeviceMapper extends ClassMapperBase<Device> {
 
   static Device _instantiate(DecodingData data) {
     return Device(
-        signalingId: data.dec(_f$signalingId),
-        ip: data.dec(_f$ip),
-        version: data.dec(_f$version),
-        port: data.dec(_f$port),
-        https: data.dec(_f$https),
-        fingerprint: data.dec(_f$fingerprint),
-        alias: data.dec(_f$alias),
-        deviceModel: data.dec(_f$deviceModel),
-        deviceType: data.dec(_f$deviceType),
-        download: data.dec(_f$download),
-        discoveryMethods: data.dec(_f$discoveryMethods));
+      signalingId: data.dec(_f$signalingId),
+      ip: data.dec(_f$ip),
+      version: data.dec(_f$version),
+      port: data.dec(_f$port),
+      https: data.dec(_f$https),
+      fingerprint: data.dec(_f$fingerprint),
+      alias: data.dec(_f$alias),
+      deviceModel: data.dec(_f$deviceModel),
+      deviceType: data.dec(_f$deviceType),
+      download: data.dec(_f$download),
+      discoveryMethods: data.dec(_f$discoveryMethods),
+    );
   }
 
   @override
@@ -473,7 +544,7 @@ mixin DeviceMappable {
     return DeviceMapper.ensureInitialized().encodeMap<Device>(this as Device);
   }
 
-  DeviceCopyWith<Device, Device, Device> get copyWith => _DeviceCopyWithImpl(this as Device, $identity, $identity);
+  DeviceCopyWith<Device, Device, Device> get copyWith => _DeviceCopyWithImpl<Device, Device>(this as Device, $identity, $identity);
   @override
   String toString() {
     return DeviceMapper.ensureInitialized().stringifyValue(this as Device);
@@ -491,22 +562,23 @@ mixin DeviceMappable {
 }
 
 extension DeviceValueCopy<$R, $Out> on ObjectCopyWith<$R, Device, $Out> {
-  DeviceCopyWith<$R, Device, $Out> get $asDevice => $base.as((v, t, t2) => _DeviceCopyWithImpl(v, t, t2));
+  DeviceCopyWith<$R, Device, $Out> get $asDevice => $base.as((v, t, t2) => _DeviceCopyWithImpl<$R, $Out>(v, t, t2));
 }
 
 abstract class DeviceCopyWith<$R, $In extends Device, $Out> implements ClassCopyWith<$R, $In, $Out> {
-  $R call(
-      {String? signalingId,
-      String? ip,
-      String? version,
-      int? port,
-      bool? https,
-      String? fingerprint,
-      String? alias,
-      String? deviceModel,
-      DeviceType? deviceType,
-      bool? download,
-      Set<DiscoveryMethod>? discoveryMethods});
+  $R call({
+    String? signalingId,
+    String? ip,
+    String? version,
+    int? port,
+    bool? https,
+    String? fingerprint,
+    String? alias,
+    String? deviceModel,
+    DeviceType? deviceType,
+    bool? download,
+    Set<DiscoveryMethod>? discoveryMethods,
+  });
   DeviceCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -516,45 +588,49 @@ class _DeviceCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Device, $Out> 
   @override
   late final ClassMapperBase<Device> $mapper = DeviceMapper.ensureInitialized();
   @override
-  $R call(
-          {Object? signalingId = $none,
-          Object? ip = $none,
-          String? version,
-          int? port,
-          bool? https,
-          String? fingerprint,
-          String? alias,
-          Object? deviceModel = $none,
-          DeviceType? deviceType,
-          bool? download,
-          Set<DiscoveryMethod>? discoveryMethods}) =>
-      $apply(FieldCopyWithData({
-        if (signalingId != $none) #signalingId: signalingId,
-        if (ip != $none) #ip: ip,
-        if (version != null) #version: version,
-        if (port != null) #port: port,
-        if (https != null) #https: https,
-        if (fingerprint != null) #fingerprint: fingerprint,
-        if (alias != null) #alias: alias,
-        if (deviceModel != $none) #deviceModel: deviceModel,
-        if (deviceType != null) #deviceType: deviceType,
-        if (download != null) #download: download,
-        if (discoveryMethods != null) #discoveryMethods: discoveryMethods
-      }));
+  $R call({
+    Object? signalingId = $none,
+    Object? ip = $none,
+    String? version,
+    int? port,
+    bool? https,
+    String? fingerprint,
+    String? alias,
+    Object? deviceModel = $none,
+    DeviceType? deviceType,
+    bool? download,
+    Set<DiscoveryMethod>? discoveryMethods,
+  }) =>
+      $apply(
+        FieldCopyWithData({
+          if (signalingId != $none) #signalingId: signalingId,
+          if (ip != $none) #ip: ip,
+          if (version != null) #version: version,
+          if (port != null) #port: port,
+          if (https != null) #https: https,
+          if (fingerprint != null) #fingerprint: fingerprint,
+          if (alias != null) #alias: alias,
+          if (deviceModel != $none) #deviceModel: deviceModel,
+          if (deviceType != null) #deviceType: deviceType,
+          if (download != null) #download: download,
+          if (discoveryMethods != null) #discoveryMethods: discoveryMethods,
+        }),
+      );
   @override
   Device $make(CopyWithData data) => Device(
-      signalingId: data.get(#signalingId, or: $value.signalingId),
-      ip: data.get(#ip, or: $value.ip),
-      version: data.get(#version, or: $value.version),
-      port: data.get(#port, or: $value.port),
-      https: data.get(#https, or: $value.https),
-      fingerprint: data.get(#fingerprint, or: $value.fingerprint),
-      alias: data.get(#alias, or: $value.alias),
-      deviceModel: data.get(#deviceModel, or: $value.deviceModel),
-      deviceType: data.get(#deviceType, or: $value.deviceType),
-      download: data.get(#download, or: $value.download),
-      discoveryMethods: data.get(#discoveryMethods, or: $value.discoveryMethods));
+        signalingId: data.get(#signalingId, or: $value.signalingId),
+        ip: data.get(#ip, or: $value.ip),
+        version: data.get(#version, or: $value.version),
+        port: data.get(#port, or: $value.port),
+        https: data.get(#https, or: $value.https),
+        fingerprint: data.get(#fingerprint, or: $value.fingerprint),
+        alias: data.get(#alias, or: $value.alias),
+        deviceModel: data.get(#deviceModel, or: $value.deviceModel),
+        deviceType: data.get(#deviceType, or: $value.deviceType),
+        download: data.get(#download, or: $value.download),
+        discoveryMethods: data.get(#discoveryMethods, or: $value.discoveryMethods),
+      );
 
   @override
-  DeviceCopyWith<$R2, Device, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) => _DeviceCopyWithImpl($value, $cast, t);
+  DeviceCopyWith<$R2, Device, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) => _DeviceCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

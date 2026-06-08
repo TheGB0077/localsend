@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Metadata for a single file in a LocalSend collection.
 /// Stored as the first blob in an iroh Collection, followed by file content blobs.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LocalSendFileMeta {
     /// Original file name (e.g. "photo.jpg").
     pub file_name: String,
@@ -27,6 +28,7 @@ pub struct LocalSendFileMeta {
 /// Collection (which maps names to BLAKE3 hashes). The subsequent entries
 /// in the Collection are the actual file contents, named by their hashes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LocalSendCollection {
     /// Human-readable sender alias.
     pub sender_alias: String,

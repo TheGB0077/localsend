@@ -171,6 +171,8 @@ class MulticastService {
       download: syncState.download,
       announcement: announcement,
       announce: announcement,
+      irohTicket: null,
+      irohCapable: true,
     );
     return utf8.encode(jsonEncode(dto.toJson()));
   }

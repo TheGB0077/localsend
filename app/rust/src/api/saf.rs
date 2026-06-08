@@ -9,7 +9,7 @@
 //! reference for later use by SAF functions.
 
 use std::fs::File;
-use std::os::fd::FromRawFd;
+use std::os::fd::{AsRawFd, FromRawFd};
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
@@ -106,8 +106,26 @@ pub fn open_content_uri(uri: &str) -> Result<File, String> {
 
 // ─── Cross-platform file access helpers ─────────────────────────────
 
+/// Open a `content://` URI and return a filesystem path that iroh can use
+/// for zero-copy import via mmap.
+///
+/// On Android (Linux), this creates a `/proc/self/fd/N` symlink path from
+/// the SAF file descriptor. iroh's `add_path` with `TryReference` will
+/// mmap this path directly — no full-file copy into memory.
+///
+/// The returned path is only valid while the underlying fd is open.
+/// The caller must keep the `File` alive for the duration of the import.
+pub fn open_uri_as_path(uri: &str) -> Result<(PathBuf, File), String> {
+    let file = open_content_uri(uri)?;
+    let fd = file.as_raw_fd();
+    let path = PathBuf::from(format!("/proc/self/fd/{fd}"));
+    Ok((path, file))
+}
+
 /// Open a `content://` URI and read its entire contents into Bytes.
-/// Avoids the temp-file copy — reads directly from the SAF fd into memory.
+///
+/// Prefer `open_uri_as_path` for large files — this loads everything
+/// into memory and should only be used for small files or as a fallback.
 pub fn read_uri_to_bytes(uri: &str) -> Result<bytes::Bytes, String> {
     use std::io::Read;
     let mut file = open_content_uri(uri)?;

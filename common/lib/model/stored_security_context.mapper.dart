@@ -1,6 +1,8 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 // ignore_for_file: type=lint
+// ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: unused_element, unnecessary_cast, override_on_non_overriding_member
 // ignore_for_file: strict_raw_type, inference_failure_on_untyped_parameter
 
@@ -21,13 +23,25 @@ class StoredSecurityContextMapper extends ClassMapperBase<StoredSecurityContext>
   final String id = 'StoredSecurityContext';
 
   static String _$privateKey(StoredSecurityContext v) => v.privateKey;
-  static const Field<StoredSecurityContext, String> _f$privateKey = Field('privateKey', _$privateKey);
+  static const Field<StoredSecurityContext, String> _f$privateKey = Field(
+    'privateKey',
+    _$privateKey,
+  );
   static String _$publicKey(StoredSecurityContext v) => v.publicKey;
-  static const Field<StoredSecurityContext, String> _f$publicKey = Field('publicKey', _$publicKey);
+  static const Field<StoredSecurityContext, String> _f$publicKey = Field(
+    'publicKey',
+    _$publicKey,
+  );
   static String _$certificate(StoredSecurityContext v) => v.certificate;
-  static const Field<StoredSecurityContext, String> _f$certificate = Field('certificate', _$certificate);
+  static const Field<StoredSecurityContext, String> _f$certificate = Field(
+    'certificate',
+    _$certificate,
+  );
   static String _$certificateHash(StoredSecurityContext v) => v.certificateHash;
-  static const Field<StoredSecurityContext, String> _f$certificateHash = Field('certificateHash', _$certificateHash);
+  static const Field<StoredSecurityContext, String> _f$certificateHash = Field(
+    'certificateHash',
+    _$certificateHash,
+  );
 
   @override
   final MappableFields<StoredSecurityContext> fields = const {
@@ -39,10 +53,11 @@ class StoredSecurityContextMapper extends ClassMapperBase<StoredSecurityContext>
 
   static StoredSecurityContext _instantiate(DecodingData data) {
     return StoredSecurityContext(
-        privateKey: data.dec(_f$privateKey),
-        publicKey: data.dec(_f$publicKey),
-        certificate: data.dec(_f$certificate),
-        certificateHash: data.dec(_f$certificateHash));
+      privateKey: data.dec(_f$privateKey),
+      publicKey: data.dec(_f$publicKey),
+      certificate: data.dec(_f$certificate),
+      certificateHash: data.dec(_f$certificateHash),
+    );
   }
 
   @override
@@ -67,31 +82,46 @@ mixin StoredSecurityContextMappable {
   }
 
   StoredSecurityContextCopyWith<StoredSecurityContext, StoredSecurityContext, StoredSecurityContext> get copyWith =>
-      _StoredSecurityContextCopyWithImpl(this as StoredSecurityContext, $identity, $identity);
+      _StoredSecurityContextCopyWithImpl<StoredSecurityContext, StoredSecurityContext>(this as StoredSecurityContext, $identity, $identity);
   @override
   String toString() {
-    return StoredSecurityContextMapper.ensureInitialized().stringifyValue(this as StoredSecurityContext);
+    return StoredSecurityContextMapper.ensureInitialized().stringifyValue(
+      this as StoredSecurityContext,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return StoredSecurityContextMapper.ensureInitialized().equalsValue(this as StoredSecurityContext, other);
+    return StoredSecurityContextMapper.ensureInitialized().equalsValue(
+      this as StoredSecurityContext,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return StoredSecurityContextMapper.ensureInitialized().hashValue(this as StoredSecurityContext);
+    return StoredSecurityContextMapper.ensureInitialized().hashValue(
+      this as StoredSecurityContext,
+    );
   }
 }
 
 extension StoredSecurityContextValueCopy<$R, $Out> on ObjectCopyWith<$R, StoredSecurityContext, $Out> {
-  StoredSecurityContextCopyWith<$R, StoredSecurityContext, $Out> get $asStoredSecurityContext =>
-      $base.as((v, t, t2) => _StoredSecurityContextCopyWithImpl(v, t, t2));
+  StoredSecurityContextCopyWith<$R, StoredSecurityContext, $Out> get $asStoredSecurityContext => $base.as(
+        (v, t, t2) => _StoredSecurityContextCopyWithImpl<$R, $Out>(v, t, t2),
+      );
 }
 
 abstract class StoredSecurityContextCopyWith<$R, $In extends StoredSecurityContext, $Out> implements ClassCopyWith<$R, $In, $Out> {
-  $R call({String? privateKey, String? publicKey, String? certificate, String? certificateHash});
-  StoredSecurityContextCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+  $R call({
+    String? privateKey,
+    String? publicKey,
+    String? certificate,
+    String? certificateHash,
+  });
+  StoredSecurityContextCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
+    Then<$Out2, $R2> t,
+  );
 }
 
 class _StoredSecurityContextCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, StoredSecurityContext, $Out>
@@ -101,20 +131,29 @@ class _StoredSecurityContextCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R,
   @override
   late final ClassMapperBase<StoredSecurityContext> $mapper = StoredSecurityContextMapper.ensureInitialized();
   @override
-  $R call({String? privateKey, String? publicKey, String? certificate, String? certificateHash}) => $apply(FieldCopyWithData({
-        if (privateKey != null) #privateKey: privateKey,
-        if (publicKey != null) #publicKey: publicKey,
-        if (certificate != null) #certificate: certificate,
-        if (certificateHash != null) #certificateHash: certificateHash
-      }));
+  $R call({
+    String? privateKey,
+    String? publicKey,
+    String? certificate,
+    String? certificateHash,
+  }) =>
+      $apply(
+        FieldCopyWithData({
+          if (privateKey != null) #privateKey: privateKey,
+          if (publicKey != null) #publicKey: publicKey,
+          if (certificate != null) #certificate: certificate,
+          if (certificateHash != null) #certificateHash: certificateHash,
+        }),
+      );
   @override
   StoredSecurityContext $make(CopyWithData data) => StoredSecurityContext(
-      privateKey: data.get(#privateKey, or: $value.privateKey),
-      publicKey: data.get(#publicKey, or: $value.publicKey),
-      certificate: data.get(#certificate, or: $value.certificate),
-      certificateHash: data.get(#certificateHash, or: $value.certificateHash));
+        privateKey: data.get(#privateKey, or: $value.privateKey),
+        publicKey: data.get(#publicKey, or: $value.publicKey),
+        certificate: data.get(#certificate, or: $value.certificate),
+        certificateHash: data.get(#certificateHash, or: $value.certificateHash),
+      );
 
   @override
   StoredSecurityContextCopyWith<$R2, StoredSecurityContext, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
-      _StoredSecurityContextCopyWithImpl($value, $cast, t);
+      _StoredSecurityContextCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
