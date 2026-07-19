@@ -6,6 +6,18 @@ edition = "2024"
 [lib]
 crate-type = ["cdylib", "staticlib"]
 
+
+[profile.dev]
+incremental = true
+debug = "line-tables-only"
+
+# Override settings specifically for dependencies
+[profile.dev.package."*"]
+opt-level = 3
+codegen-units = 16
+strip = "symbols"
+debug = false
+
 [dependencies]
 anyhow = "1.0"
 bytes = "1.9"

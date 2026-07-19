@@ -41,3 +41,13 @@ http = ["crypto", "http-body-util", "hyper", "hyper-util", "pem", "reqwest", "ru
 webrtc-signaling = ["tokio-tungstenite"]
 webrtc = ["crypto", "flate2", "dep:webrtc", "webrtc-signaling", "x509-parser"]
 full = ["crypto", "http", "webrtc"]
+[profile.dev]
+debug = "line-tables-only"
+incremental = true
+
+# Override settings specifically for dependencies
+[profile.dev.package."*"]
+opt-level = 3
+debug = false
+strip = "symbols"
+codegen-units = 16
